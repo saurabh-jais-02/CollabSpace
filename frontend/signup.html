@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Sign Up | CollabSpace</title>
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="auth-page">
+      <div class="auth-box">
+        <h1>Create Account</h1>
+
+        <p>Join CollabSpace today</p>
+
+        <!-- SIGNUP FORM -->
+        <form id="signupForm">
+          <input type="text" id="name" placeholder="Full Name" required />
+
+          <input type="email" id="email" placeholder="Email Address" required />
+
+          <input
+            type="password"
+            id="password"
+            placeholder="Create Password"
+            required
+          />
+
+          <button type="submit">Create Account</button>
+        </form>
+
+        <p>
+          Already have an account?
+
+          <a href="login.html"> Login </a>
+        </p>
+
+        <a href="index.html"> ← Back to Home </a>
+      </div>
+    </div>
+
+    <!-- JAVASCRIPT -->
+
+    <script>
+      const signupForm = document.getElementById("signupForm");
+
+      signupForm.addEventListener("submit", async function (event) {
+        // Page reload ko rokna
+        event.preventDefault();
+
+        // Input values lena
+
+        const name = document.getElementById("name").value;
+
+        const email = document.getElementById("email").value;
+
+        const password = document.getElementById("password").value;
+
+        try {
+          // Backend API ko request
+
+          const response = await fetch("http://localhost:3000/api/signup", {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json",
+            },
+
+            body: JSON.stringify({
+              name: name,
+
+              email: email,
+
+              password: password,
+            }),
+          });
+
+          // Backend response
+
+          const data = await response.json();
+
+          // Message show
+
+          alert(data.message);
+
+          // Signup successful
+
+          if (response.ok) {
+            window.location.href = "login.html";
+          }
+        } catch (error) {
+          console.log(error);
+
+          alert("Server se connection nahi ho pa raha ❌");
+        }
+      });
+    </script>
+  </body>
+</html>

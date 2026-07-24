@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Chat | CollabSpace</title>
+
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- SOCKET.IO -->
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  </head>
+
+  <body>
+    <div class="chat-app">
+      <!-- SIDEBAR -->
+
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h2>CollabSpace</h2>
+
+          <button id="logoutBtn">Logout</button>
+        </div>
+
+        <!-- CURRENT USER -->
+
+        <div class="user-profile">
+          <div class="profile-avatar">👤</div>
+
+          <div>
+            <h3 id="currentUserName">User</h3>
+
+            <p>Online</p>
+          </div>
+        </div>
+
+        <!-- SEARCH -->
+
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Search users..." />
+        </div>
+
+        <!-- USERS -->
+
+        <div class="users-list" id="usersList"></div>
+      </aside>
+
+      <!-- CHAT AREA -->
+
+      <main class="chat-area">
+        <!-- CHAT HEADER -->
+
+        <header class="chat-header">
+          <div class="chat-user-avatar">👥</div>
+
+          <div>
+            <h3 id="chatTitle">Select a user</h3>
+
+            <p>Online</p>
+          </div>
+        </header>
+
+        <!-- MESSAGES -->
+
+        <div class="messages" id="messages">
+          <div class="message received">
+            <p>Select a user to start chatting 👋</p>
+
+            <span> Now </span>
+          </div>
+        </div>
+
+        <!-- MESSAGE INPUT -->
+
+        <div class="message-input-area">
+          <input
+            type="text"
+            id="messageInput"
+            placeholder="Type a message..."
+          />
+
+          <button id="sendBtn">Send</button>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // ==============================
+      // SOCKET.IO CONNECTION
+      // ==============================
+
+      const socket = io("http://localhost:3000");
+
+      // ==============================
+      // USER LOGIN CHECK
+      // ==============================
+
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      if (!user) {
+        alert("Please login first ❌");
+
+        window.location.href = "login.html";
+      } else {
+        document.getElementById("currentUserName").innerText = user.name;
+
+        // User ko server room me join karna
+
+        socket.emit("join", user.id);
+      }
+
+      // ==============================
+      // LOGOUT
+      // ==============================
+
+      document
+        .getElementById("logoutBtn")
+        .addEventListener("click", function () {
+          localStorage.removeItem("user");
+
+          window.location.href = "login.html";
+        });
+
+      // ==============================
+      // ELEMENTS
+      // ==============================
+
+      const searchInput = document.getElementById("searchInput");
+
+      const usersList = document.getElementById("usersList");
+
+      const chatTitle = document.getElementById("chatTitle");
+
+      const messageInput = document.getElementById("messageInput");
+
+      const sendBtn = document.getElementById("sendBtn");
+
+      const messages = document.getElementById("messages");
+
+      let allUsers = [];
+
+      let selectedUser = null;
+
+      // ==============================
+      // LOAD USERS
+      // ==============================
+
+      async function loadUsers() {
+        try {
+          const response = await fetch("http://localhost:3000/api/users");
+
+          if (!response.ok) {
+            throw new Error("Server Error: " + response.status);
+          }
+
+          const users = await response.json();
+
+          allUsers = users;
+
+          displayUsers(allUsers);
+        } catch (error) {
+          console.error(error);
+
+          usersList.innerHTML = `
+
+            <p
+              style="
+                color: red;
+                padding: 10px;
+              "
+            >
+
+              Users load nahi ho paaye ❌
+
+            </p>
+
+          `;
+        }
+      }
+
+      // ==============================
+      // DISPLAY USERS
+      // ==============================
+
+      function displayUsers(users) {
+        usersList.innerHTML = "";
+
+        users.forEach(function (person) {
+          // Current user hide
+
+          if (Number(person.id) === Number(user.id)) {
+            return;
+          }
+
+          const userItem = document.createElement("div");
+
+          userItem.className = "user-item";
+
+          userItem.dataset.name = person.name;
+
+          userItem.innerHTML = `
+
+              <div
+                class="user-avatar"
+              >
+
+                👤
+
+              </div>
+
+
+              <div>
+
+                <h4>
+
+                  ${person.name}
+
+                </h4>
+
+
+                <p>
+
+                  ${person.email}
+
+                </p>
+
+              </div>
+
+            `;
+
+          // SELECT USER
+
+          userItem.addEventListener("click", function () {
+            document.querySelectorAll(".user-item").forEach(function (item) {
+              item.classList.remove("active");
+            });
+
+            this.classList.add("active");
+
+            selectedUser = person;
+
+            chatTitle.innerText = person.name;
+
+            messages.innerHTML = `
+
+                  <div
+                    class="message received"
+                  >
+
+                    <p>
+
+                      Start chatting with
+                      ${person.name} 👋
+
+                    </p>
+
+
+                    <span>
+                      Now
+                    </span>
+
+                  </div>
+
+                `;
+          });
+
+          usersList.appendChild(userItem);
+        });
+      }
+
+      // ==============================
+      // SEARCH USERS
+      // ==============================
+
+      searchInput.addEventListener("input", function () {
+        const searchValue = searchInput.value.toLowerCase();
+
+        const filteredUsers = allUsers.filter(function (person) {
+          return person.name.toLowerCase().includes(searchValue);
+        });
+
+        displayUsers(filteredUsers);
+      });
+
+      // ==============================
+      // SEND REAL-TIME MESSAGE
+      // ==============================
+
+      function sendMessage() {
+        const message = messageInput.value.trim();
+
+        if (message === "") {
+          return;
+        }
+
+        if (!selectedUser) {
+          alert("Please select a user first ❌");
+
+          return;
+        }
+
+        const messageData = {
+          senderId: user.id,
+
+          senderName: user.name,
+
+          receiverId: selectedUser.id,
+
+          message: message,
+
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+
+            minute: "2-digit",
+          }),
+        };
+
+        // Server ko message send
+
+        socket.emit("sendMessage", messageData);
+
+        // Apne screen par message show
+
+        showMessage(messageData, "sent");
+
+        messageInput.value = "";
+
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      // ==============================
+      // RECEIVE MESSAGE
+      // ==============================
+
+      socket.on("receiveMessage", function (data) {
+        // Sender ka message receive hua
+
+        if (Number(data.senderId) !== Number(user.id)) {
+          showMessage(data, "received");
+
+          messages.scrollTop = messages.scrollHeight;
+        }
+      });
+
+      // ==============================
+      // SHOW MESSAGE
+      // ==============================
+
+      function showMessage(data, messageType) {
+        const messageDiv = document.createElement("div");
+
+        messageDiv.className = "message " + messageType;
+
+        messageDiv.innerHTML = `
+
+          <p>
+
+            ${data.message}
+
+          </p>
+
+
+          <span>
+
+            ${data.time}
+
+          </span>
+
+        `;
+
+        messages.appendChild(messageDiv);
+      }
+
+      // ==============================
+      // SEND BUTTON
+      // ==============================
+
+      sendBtn.addEventListener("click", sendMessage);
+
+      // ==============================
+      // ENTER KEY
+      // ==============================
+
+      messageInput.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+          sendMessage();
+        }
+      });
+
+      // ==============================
+      // LOAD USERS
+      // ==============================
+
+      loadUsers();
+    </script>
+  </body>
+</html>
