@@ -2,397 +2,558 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <title>Chat | CollabSpace</title>
-
     <link rel="stylesheet" href="style.css" />
-
     <!-- SOCKET.IO -->
     <script src="http://localhost:3000/socket.io/socket.io.js"></script>
   </head>
 
   <body>
-    <div class="chat-app">
-      <!-- SIDEBAR -->
 
-      <aside class="sidebar">
-        <div class="sidebar-header">
-          <h2>CollabSpace</h2>
+    <!-- TOAST -->
+    <div id="toast-container"></div>
 
-          <button id="logoutBtn">Logout</button>
+    <div class="workspace">
+
+      <!-- ===================== ICON SIDEBAR ===================== -->
+      <div class="workspace-sidebar">
+        <div class="sidebar-logo" title="CollabSpace">💬</div>
+
+        <div class="sidebar-divider"></div>
+
+        <button class="sidebar-icon-btn active" title="Messages">
+          💬
+          <span class="sidebar-tooltip">Messages</span>
+        </button>
+
+        <button class="sidebar-icon-btn" title="Team">
+          👥
+          <span class="sidebar-tooltip">Team</span>
+        </button>
+
+        <button class="sidebar-icon-btn" title="Notifications">
+          🔔
+          <span class="sidebar-tooltip">Notifications</span>
+        </button>
+
+        <button class="sidebar-icon-btn" title="Settings">
+          ⚙️
+          <span class="sidebar-tooltip">Settings</span>
+        </button>
+
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-bottom">
+          <button class="sidebar-icon-btn" id="logoutIconBtn" title="Logout">
+            🚪
+            <span class="sidebar-tooltip">Logout</span>
+          </button>
         </div>
+      </div>
 
-        <!-- CURRENT USER -->
-
-        <div class="user-profile">
-          <div class="profile-avatar">👤</div>
-
-          <div>
-            <h3 id="currentUserName">User</h3>
-
-            <p>Online</p>
+      <!-- ===================== USERS PANEL ===================== -->
+      <aside class="users-panel">
+        <div class="panel-header">
+          <div class="panel-title">CollabSpace</div>
+          <!-- Search -->
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input
+              type="text"
+              id="searchInput"
+              class="search-input"
+              placeholder="Search users..."
+            />
           </div>
         </div>
 
-        <!-- SEARCH -->
-
-        <div class="search-box">
-          <input type="text" id="searchInput" placeholder="Search users..." />
+        <!-- Current User Card -->
+        <div class="current-user-card">
+          <div class="user-avatar-wrap">
+            <div class="user-avatar">👤</div>
+            <div class="status-dot online" id="myStatusDot"></div>
+          </div>
+          <div>
+            <div class="current-user-name" id="currentUserName">User</div>
+            <div class="current-user-status" id="currentUserStatus">🟢 Online</div>
+          </div>
+          <select class="status-select" id="statusSelect">
+            <option value="online">🟢 Online</option>
+            <option value="away">🟡 Away</option>
+            <option value="busy">🔴 Busy</option>
+          </select>
         </div>
 
-        <!-- USERS -->
-
+        <!-- Users List -->
+        <div class="users-section-title">Direct Messages</div>
         <div class="users-list" id="usersList"></div>
       </aside>
 
-      <!-- CHAT AREA -->
-
+      <!-- ===================== CHAT AREA ===================== -->
       <main class="chat-area">
-        <!-- CHAT HEADER -->
 
+        <!-- Chat Header -->
         <header class="chat-header">
-          <div class="chat-user-avatar">👥</div>
-
+          <div class="chat-header-avatar" id="chatHeaderAvatar">
+            <span>💬</span>
+          </div>
           <div>
-            <h3 id="chatTitle">Select a user</h3>
-
-            <p>Online</p>
+            <div class="chat-header-name" id="chatTitle">Select a user to start chatting</div>
+            <div class="chat-header-status" id="chatHeaderStatus">💬 CollabSpace</div>
+          </div>
+          <div class="chat-header-actions">
+            <button class="chat-action-btn" title="Voice Call" onclick="showToast('Voice call coming soon! 🎙️', 'info')">📞</button>
+            <button class="chat-action-btn" title="Video Call" onclick="showToast('Video call coming soon! 🎥', 'info')">🎥</button>
+            <button class="chat-action-btn" title="More Options">⋮</button>
+            <button class="btn-logout" id="logoutBtn">🚪 Logout</button>
           </div>
         </header>
 
-        <!-- MESSAGES -->
-
-        <div class="messages" id="messages">
-          <div class="message received">
-            <p>Select a user to start chatting 👋</p>
-
-            <span> Now </span>
+        <!-- Messages Area -->
+        <div class="messages-area" id="messages">
+          <!-- Empty State -->
+          <div class="chat-empty" id="chatEmpty">
+            <div class="chat-empty-icon">💬</div>
+            <h3>Start a Conversation</h3>
+            <p>Select a user from the left panel to begin chatting in real time.</p>
           </div>
         </div>
 
-        <!-- MESSAGE INPUT -->
-
-        <div class="message-input-area">
-          <input
-            type="text"
-            id="messageInput"
-            placeholder="Type a message..."
-          />
-
-          <button id="sendBtn">Send</button>
+        <!-- Typing Indicator -->
+        <div class="typing-indicator-wrap" id="typingIndicator">
+          <div class="typing-indicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+          <span class="typing-text" id="typingText">Someone is typing...</span>
         </div>
+
+        <!-- Message Input -->
+        <div class="message-input-area">
+          <div class="input-toolbar">
+            <button class="input-action-btn" title="Attach file" onclick="showToast('File sharing coming soon! 📎', 'info')">📎</button>
+            <button class="input-action-btn" title="Emoji" id="emojiBtn">😊</button>
+
+            <input
+              type="text"
+              id="messageInput"
+              class="message-input"
+              placeholder="Type a message... (Enter to send)"
+            />
+
+            <button class="input-action-btn" title="Voice message" onclick="showToast('Voice message coming soon! 🎙️', 'info')">🎙️</button>
+            <button class="send-btn" id="sendBtn" title="Send message">➤</button>
+          </div>
+        </div>
+
       </main>
     </div>
 
+    <!-- Simple Emoji Picker -->
+    <div id="emojiPicker" style="
+      display: none;
+      position: fixed;
+      bottom: 90px;
+      left: 420px;
+      background: rgba(17,24,39,0.98);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 16px;
+      z-index: 1000;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      display: none;
+    ">
+      <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Quick Emojis</div>
+      <div style="display: grid; grid-template-columns: repeat(8,1fr); gap: 6px;" id="emojiGrid"></div>
+    </div>
+
     <script>
-      // ==============================
-      // SOCKET.IO CONNECTION
-      // ==============================
-
-      const socket = io("http://localhost:3000");
-
-      // ==============================
-      // USER LOGIN CHECK
-      // ==============================
-
-      const user = JSON.parse(localStorage.getItem("user"));
-
-      if (!user) {
-        alert("Please login first ❌");
-
-        window.location.href = "login.html";
-      } else {
-        document.getElementById("currentUserName").innerText = user.name;
-
-        // User ko server room me join karna
-
-        socket.emit("join", user.id);
+      // ============================================
+      // TOAST SYSTEM
+      // ============================================
+      function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const icons = { success: '✅', error: '❌', info: '💬', warning: '⚠️' };
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+          <span class="toast-icon">${icons[type] || '💬'}</span>
+          <span class="toast-message">${message}</span>
+        `;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.classList.add('hide');
+          setTimeout(() => toast.remove(), 300);
+        }, 3500);
       }
 
-      // ==============================
-      // LOGOUT
-      // ==============================
+      // ============================================
+      // EMOJI PICKER
+      // ============================================
+      const emojis = ['😊','😂','❤️','👍','🎉','🔥','💬','✅','🚀','💡','😎','🙌','👏','💪','🤝','😍','🎯','⚡','✨','🌟','😅','🙏','👋','🎨','💻','📱','🔒','🌍','📎','🎙️'];
+      const emojiGrid = document.getElementById('emojiGrid');
+      const emojiPicker = document.getElementById('emojiPicker');
+      const emojiBtn = document.getElementById('emojiBtn');
 
-      document
-        .getElementById("logoutBtn")
-        .addEventListener("click", function () {
-          localStorage.removeItem("user");
-
-          window.location.href = "login.html";
+      emojis.forEach(emoji => {
+        const btn = document.createElement('button');
+        btn.textContent = emoji;
+        btn.style.cssText = 'font-size:20px; background:none; border:none; cursor:pointer; padding:4px; border-radius:6px; transition: transform 0.1s;';
+        btn.addEventListener('mouseenter', () => btn.style.transform = 'scale(1.3)');
+        btn.addEventListener('mouseleave', () => btn.style.transform = 'scale(1)');
+        btn.addEventListener('click', () => {
+          const input = document.getElementById('messageInput');
+          input.value += emoji;
+          input.focus();
+          emojiPicker.style.display = 'none';
         });
+        emojiGrid.appendChild(btn);
+      });
 
-      // ==============================
-      // ELEMENTS
-      // ==============================
+      emojiBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        emojiPicker.style.display = emojiPicker.style.display === 'none' ? 'block' : 'none';
+      });
 
-      const searchInput = document.getElementById("searchInput");
+      document.addEventListener('click', () => {
+        emojiPicker.style.display = 'none';
+      });
 
-      const usersList = document.getElementById("usersList");
+      // ============================================
+      // STATUS SELECTOR
+      // ============================================
+      const statusSelect = document.getElementById('statusSelect');
+      const myStatusDot = document.getElementById('myStatusDot');
+      const currentUserStatus = document.getElementById('currentUserStatus');
 
-      const chatTitle = document.getElementById("chatTitle");
+      statusSelect.addEventListener('change', () => {
+        const val = statusSelect.value;
+        myStatusDot.className = `status-dot ${val}`;
+        const labels = { online: '🟢 Online', away: '🟡 Away', busy: '🔴 Busy' };
+        currentUserStatus.textContent = labels[val];
+        showToast(`Status updated to ${labels[val]}`, 'info');
+      });
 
-      const messageInput = document.getElementById("messageInput");
+      // ============================================
+      // SOCKET.IO CONNECTION
+      // ============================================
+      let socket;
+      try {
+        socket = io('http://localhost:3000');
+        socket.on('connect', () => {
+          showToast('Connected to CollabSpace 🟢', 'success');
+        });
+        socket.on('connect_error', () => {
+          showToast('Running in offline mode 📴', 'warning');
+        });
+      } catch (e) {
+        console.log('Socket.io not available - offline mode');
+      }
 
-      const sendBtn = document.getElementById("sendBtn");
+      // ============================================
+      // AUTH CHECK
+      // ============================================
+      const user = JSON.parse(localStorage.getItem('user'));
 
-      const messages = document.getElementById("messages");
+      if (!user) {
+        showToast('Please login first ❌', 'error');
+        setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+      } else {
+        document.getElementById('currentUserName').textContent = user.name;
+        if (socket) socket.emit('join', user.id);
+        showToast(`Welcome back, ${user.name}! 👋`, 'success');
+      }
+
+      // ============================================
+      // LOGOUT
+      // ============================================
+      function doLogout() {
+        localStorage.removeItem('user');
+        showToast('Logging out... 👋', 'info');
+        setTimeout(() => { window.location.href = 'login.html'; }, 1000);
+      }
+
+      document.getElementById('logoutBtn').addEventListener('click', doLogout);
+      document.getElementById('logoutIconBtn').addEventListener('click', doLogout);
+
+      // ============================================
+      // STATE
+      // ============================================
+      const searchInput = document.getElementById('searchInput');
+      const usersList = document.getElementById('usersList');
+      const chatTitle = document.getElementById('chatTitle');
+      const chatHeaderStatus = document.getElementById('chatHeaderStatus');
+      const chatHeaderAvatar = document.getElementById('chatHeaderAvatar');
+      const messageInput = document.getElementById('messageInput');
+      const sendBtn = document.getElementById('sendBtn');
+      const messagesArea = document.getElementById('messages');
+      const chatEmpty = document.getElementById('chatEmpty');
+      const typingIndicator = document.getElementById('typingIndicator');
+      const typingText = document.getElementById('typingText');
 
       let allUsers = [];
-
       let selectedUser = null;
 
-      // ==============================
+      // ============================================
       // LOAD USERS
-      // ==============================
-
+      // ============================================
       async function loadUsers() {
         try {
-          const response = await fetch("http://localhost:3000/api/users");
-
-          if (!response.ok) {
-            throw new Error("Server Error: " + response.status);
-          }
-
+          const response = await fetch('http://localhost:3000/api/users');
+          if (!response.ok) throw new Error('Server error');
           const users = await response.json();
-
           allUsers = users;
-
           displayUsers(allUsers);
         } catch (error) {
           console.error(error);
-
-          usersList.innerHTML = `
-
-            <p
-              style="
-                color: red;
-                padding: 10px;
-              "
-            >
-
-              Users load nahi ho paaye ❌
-
-            </p>
-
-          `;
+          // Show offline placeholder users
+          const demoUsers = [
+            { id: 99, name: 'Priya Singh', email: 'priya@demo.com' },
+            { id: 98, name: 'Rahul Kumar', email: 'rahul@demo.com' },
+            { id: 97, name: 'Arjun Mehta', email: 'arjun@demo.com' },
+          ];
+          allUsers = demoUsers;
+          displayUsers(demoUsers);
+          showToast('Showing demo users (offline mode) 📴', 'warning');
         }
       }
 
-      // ==============================
+      // ============================================
       // DISPLAY USERS
-      // ==============================
-
+      // ============================================
       function displayUsers(users) {
-        usersList.innerHTML = "";
+        usersList.innerHTML = '';
+        let count = 0;
 
         users.forEach(function (person) {
-          // Current user hide
+          if (user && Number(person.id) === Number(user.id)) return;
+          count++;
 
-          if (Number(person.id) === Number(user.id)) {
-            return;
-          }
+          const avatarColors = [
+            'linear-gradient(135deg, #6366f1, #8b5cf6)',
+            'linear-gradient(135deg, #06b6d4, #6366f1)',
+            'linear-gradient(135deg, #10b981, #06b6d4)',
+            'linear-gradient(135deg, #ec4899, #6366f1)',
+            'linear-gradient(135deg, #f59e0b, #ec4899)',
+          ];
+          const color = avatarColors[(person.id || count) % avatarColors.length];
+          const initial = person.name ? person.name.charAt(0).toUpperCase() : '?';
 
-          const userItem = document.createElement("div");
-
-          userItem.className = "user-item";
-
+          const userItem = document.createElement('div');
+          userItem.className = 'user-item';
           userItem.dataset.name = person.name;
-
           userItem.innerHTML = `
+            <div class="user-item-avatar" style="background: ${color}; color: white; font-size: 16px; font-weight: 700;">
+              ${initial}
+              <div class="status-dot online" style="position:absolute; bottom:1px; right:1px; width:10px; height:10px; border:2px solid var(--bg-secondary);"></div>
+            </div>
+            <div>
+              <div class="user-item-name">${escapeHtml(person.name)}</div>
+              <div class="user-item-email">${escapeHtml(person.email)}</div>
+            </div>
+          `;
 
-              <div
-                class="user-avatar"
-              >
-
-                👤
-
-              </div>
-
-
-              <div>
-
-                <h4>
-
-                  ${person.name}
-
-                </h4>
-
-
-                <p>
-
-                  ${person.email}
-
-                </p>
-
-              </div>
-
-            `;
-
-          // SELECT USER
-
-          userItem.addEventListener("click", function () {
-            document.querySelectorAll(".user-item").forEach(function (item) {
-              item.classList.remove("active");
-            });
-
-            this.classList.add("active");
-
+          userItem.addEventListener('click', function () {
+            document.querySelectorAll('.user-item').forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
             selectedUser = person;
-
-            chatTitle.innerText = person.name;
-
-            messages.innerHTML = `
-
-                  <div
-                    class="message received"
-                  >
-
-                    <p>
-
-                      Start chatting with
-                      ${person.name} 👋
-
-                    </p>
-
-
-                    <span>
-                      Now
-                    </span>
-
-                  </div>
-
-                `;
+            openChat(person, color, initial);
           });
 
           usersList.appendChild(userItem);
         });
+
+        if (count === 0) {
+          usersList.innerHTML = `
+            <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 14px;">
+              No other users found
+            </div>
+          `;
+        }
       }
 
-      // ==============================
+      // ============================================
+      // OPEN CHAT WITH USER
+      // ============================================
+      function openChat(person, color, initial) {
+        // Update header
+        chatTitle.textContent = person.name;
+        chatHeaderStatus.textContent = '🟢 Online';
+        chatHeaderAvatar.innerHTML = `
+          <div style="
+            width: 40px; height: 40px; border-radius: 50%;
+            background: ${color};
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; font-weight: 700; color: white;
+          ">${initial}</div>
+          <div class="status-dot online" style="position:absolute; bottom:2px; right:2px; width:11px; height:11px; border:2px solid var(--bg-secondary);"></div>
+        `;
+        chatHeaderAvatar.style.position = 'relative';
+
+        // Clear messages
+        messagesArea.innerHTML = '';
+        chatEmpty.style.display = 'none';
+
+        // Add date separator
+        addDateSeparator('Today');
+
+        // Welcome message
+        addMessage({
+          message: `Start chatting with ${person.name} 👋`,
+          time: formatTime(new Date()),
+        }, 'received');
+
+        messageInput.focus();
+      }
+
+      // ============================================
       // SEARCH USERS
-      // ==============================
-
-      searchInput.addEventListener("input", function () {
-        const searchValue = searchInput.value.toLowerCase();
-
-        const filteredUsers = allUsers.filter(function (person) {
-          return person.name.toLowerCase().includes(searchValue);
-        });
-
-        displayUsers(filteredUsers);
+      // ============================================
+      searchInput.addEventListener('input', function () {
+        const val = searchInput.value.toLowerCase();
+        const filtered = allUsers.filter(p =>
+          p.name.toLowerCase().includes(val) ||
+          p.email.toLowerCase().includes(val)
+        );
+        displayUsers(filtered);
       });
 
-      // ==============================
-      // SEND REAL-TIME MESSAGE
-      // ==============================
-
+      // ============================================
+      // SEND MESSAGE
+      // ============================================
       function sendMessage() {
-        const message = messageInput.value.trim();
+        const text = messageInput.value.trim();
 
-        if (message === "") {
-          return;
-        }
+        if (!text) return;
 
         if (!selectedUser) {
-          alert("Please select a user first ❌");
-
+          showToast('Please select a user to chat with 💬', 'warning');
           return;
         }
 
+        const now = new Date();
         const messageData = {
-          senderId: user.id,
-
-          senderName: user.name,
-
+          senderId: user ? user.id : 0,
+          senderName: user ? user.name : 'You',
           receiverId: selectedUser.id,
-
-          message: message,
-
-          time: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-
-            minute: "2-digit",
-          }),
+          message: text,
+          time: formatTime(now),
         };
 
-        // Server ko message send
+        // Emit to socket
+        if (socket && socket.connected) {
+          socket.emit('sendMessage', messageData);
+        }
 
-        socket.emit("sendMessage", messageData);
-
-        // Apne screen par message show
-
-        showMessage(messageData, "sent");
-
-        messageInput.value = "";
-
-        messages.scrollTop = messages.scrollHeight;
+        // Show in UI
+        addMessage(messageData, 'sent');
+        messageInput.value = '';
+        messagesArea.scrollTop = messagesArea.scrollHeight;
       }
 
-      // ==============================
+      // ============================================
       // RECEIVE MESSAGE
-      // ==============================
+      // ============================================
+      if (socket) {
+        socket.on('receiveMessage', function (data) {
+          if (user && Number(data.senderId) !== Number(user.id)) {
+            // Show typing first then message
+            showTypingIndicator(data.senderName);
+            setTimeout(() => {
+              hideTypingIndicator();
+              addMessage(data, 'received');
+              messagesArea.scrollTop = messagesArea.scrollHeight;
+              showToast(`New message from ${data.senderName} 💬`, 'info');
+            }, 800);
+          }
+        });
+      }
 
-      socket.on("receiveMessage", function (data) {
-        // Sender ka message receive hua
+      // ============================================
+      // ADD MESSAGE TO UI
+      // ============================================
+      function addMessage(data, type) {
+        // Remove empty state if present
+        if (chatEmpty) chatEmpty.style.display = 'none';
 
-        if (Number(data.senderId) !== Number(user.id)) {
-          showMessage(data, "received");
+        const wrap = document.createElement('div');
+        wrap.className = `message-wrap ${type}`;
 
-          messages.scrollTop = messages.scrollHeight;
-        }
-      });
+        const tick = type === 'sent' ? '<span class="message-tick">✓✓</span>' : '';
 
-      // ==============================
-      // SHOW MESSAGE
-      // ==============================
-
-      function showMessage(data, messageType) {
-        const messageDiv = document.createElement("div");
-
-        messageDiv.className = "message " + messageType;
-
-        messageDiv.innerHTML = `
-
-          <p>
-
-            ${data.message}
-
-          </p>
-
-
-          <span>
-
-            ${data.time}
-
-          </span>
-
+        wrap.innerHTML = `
+          <div class="message-bubble">${escapeHtml(data.message)}</div>
+          <div class="message-meta">
+            <span class="message-time">${data.time}</span>
+            ${tick}
+          </div>
         `;
 
-        messages.appendChild(messageDiv);
+        // Animate in
+        wrap.style.animation = 'fadeIn 0.3s ease';
+        messagesArea.appendChild(wrap);
+        messagesArea.scrollTop = messagesArea.scrollHeight;
       }
 
-      // ==============================
-      // SEND BUTTON
-      // ==============================
+      // ============================================
+      // DATE SEPARATOR
+      // ============================================
+      function addDateSeparator(label) {
+        const sep = document.createElement('div');
+        sep.className = 'date-separator';
+        sep.innerHTML = `
+          <div class="date-line"></div>
+          <div class="date-text">${label}</div>
+          <div class="date-line"></div>
+        `;
+        messagesArea.appendChild(sep);
+      }
 
-      sendBtn.addEventListener("click", sendMessage);
+      // ============================================
+      // TYPING INDICATOR
+      // ============================================
+      function showTypingIndicator(name) {
+        typingText.textContent = `${name} is typing...`;
+        typingIndicator.classList.add('visible');
+      }
 
-      // ==============================
-      // ENTER KEY
-      // ==============================
+      function hideTypingIndicator() {
+        typingIndicator.classList.remove('visible');
+      }
 
-      messageInput.addEventListener("keypress", function (event) {
-        if (event.key === "Enter") {
+      // ============================================
+      // SEND BUTTON & ENTER KEY
+      // ============================================
+      sendBtn.addEventListener('click', sendMessage);
+      messageInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
           sendMessage();
         }
       });
 
-      // ==============================
-      // LOAD USERS
-      // ==============================
+      // ============================================
+      // HELPERS
+      // ============================================
+      function formatTime(date) {
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
 
+      function escapeHtml(text) {
+        if (!text) return '';
+        return String(text)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      // ============================================
+      // LOAD USERS ON START
+      // ============================================
       loadUsers();
     </script>
   </body>

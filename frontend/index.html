@@ -3,130 +3,571 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <title>CollabSpace | Connect & Collaborate</title>
-
+    <meta name="description" content="CollabSpace - Modern real-time collaboration and team chat platform. Connect, collaborate, and grow together." />
+    <title>CollabSpace | Connect & Collaborate in Real Time</title>
     <link rel="stylesheet" href="style.css" />
   </head>
 
   <body>
-    <!-- NAVBAR -->
-    <header class="navbar">
-      <div class="logo">CollabSpace</div>
 
-      <nav>
-        <a href="#home"> Home </a>
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container"></div>
 
-        <a href="#about"> About </a>
+    <!-- ===================== NAVBAR ===================== -->
+    <header class="navbar" id="navbar">
+      <a href="index.html" class="nav-logo">
+        <div class="nav-logo-icon">💬</div>
+        <span class="nav-logo-text">CollabSpace</span>
+      </a>
 
-        <a href="#features"> Features </a>
+      <ul class="nav-links">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#demo">Live Demo</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
 
-        <a href="#contact"> Contact </a>
-      </nav>
-
-      <div class="auth-buttons">
-        <a href="login.html" class="login-btn"> Login </a>
-
-        <a href="signup.html" class="signup-btn"> Sign Up </a>
+      <div class="nav-actions">
+        <a href="login.html" class="btn-ghost">Login</a>
+        <a href="signup.html" class="btn-primary">Get Started →</a>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
       </div>
     </header>
 
-    <!-- HOME SECTION -->
+    <!-- Mobile Nav -->
+    <nav class="mobile-nav" id="mobileNav">
+      <a href="#home" onclick="closeMobileNav()">🏠 Home</a>
+      <a href="#features" onclick="closeMobileNav()">⚡ Features</a>
+      <a href="#about" onclick="closeMobileNav()">ℹ️ About</a>
+      <a href="#demo" onclick="closeMobileNav()">💬 Live Demo</a>
+      <a href="#contact" onclick="closeMobileNav()">📬 Contact</a>
+      <a href="login.html">🔑 Login</a>
+      <a href="signup.html" class="btn-primary" style="text-align:center; margin-top:8px;">Get Started →</a>
+    </nav>
+
+    <!-- ===================== HERO SECTION ===================== -->
     <section id="home" class="hero">
-      <div class="hero-content">
-        <h1>
-          Connect. Collaborate.
-
-          <span> Grow Together. </span>
-        </h1>
-
-        <p>
-          CollabSpace is a modern platform where teams, friends, and communities
-          connect and collaborate in one powerful space.
-        </p>
-
-        <div class="hero-buttons">
-          <a href="signup.html" class="primary-btn"> Get Started </a>
-
-          <a href="#features" class="secondary-btn"> Explore Features </a>
-        </div>
+      <div class="hero-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
       </div>
 
-      <div class="hero-cards">
-        <div class="floating-card card-one">
-          <span> 💬 </span>
+      <div class="hero-grid">
+        <!-- LEFT: Text -->
+        <div class="hero-content">
+          <div class="hero-badge">
+            <span class="hero-badge-dot"></span>
+            🚀 Now with Real-Time Messaging
+          </div>
 
-          <h3>Team Chat</h3>
+          <h1 class="hero-title">
+            Connect. Collaborate.<br>
+            <span class="gradient-text">Grow Together.</span>
+          </h1>
 
-          <p>Connect with your team instantly.</p>
+          <p class="hero-desc">
+            CollabSpace is a modern platform where teams, friends, and communities connect and chat in one powerful, beautiful space. Built for the future of work.
+          </p>
+
+          <div class="hero-buttons">
+            <a href="signup.html" class="btn-hero-primary" id="hero-cta">
+              🚀 Start for Free
+            </a>
+            <a href="#demo" class="btn-hero-secondary">
+              ▶ See Live Demo
+            </a>
+          </div>
+
+          <div class="hero-stats">
+            <div class="stat-item">
+              <div class="stat-number" data-target="12000">0</div>
+              <div class="stat-label">Active Users</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number" data-target="500000">0</div>
+              <div class="stat-label">Messages Sent</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">99.9%</div>
+              <div class="stat-label">Uptime</div>
+            </div>
+          </div>
         </div>
 
-        <div class="floating-card card-two">
-          <span> 🤝 </span>
+        <!-- RIGHT: App Preview -->
+        <div class="hero-visual">
+          <div class="app-preview">
+            <div class="preview-bar">
+              <div class="preview-dot"></div>
+              <div class="preview-dot"></div>
+              <div class="preview-dot"></div>
+              <span class="preview-title">CollabSpace — Team Chat</span>
+            </div>
+            <div class="preview-body">
+              <div class="preview-sidebar">
+                <div class="preview-user active">
+                  <div class="preview-avatar"></div>
+                  <span class="preview-name">Rahul K.</span>
+                </div>
+                <div class="preview-user">
+                  <div class="preview-avatar" style="background: linear-gradient(135deg, #06b6d4, #8b5cf6);"></div>
+                  <span class="preview-name">Priya S.</span>
+                </div>
+                <div class="preview-user">
+                  <div class="preview-avatar" style="background: linear-gradient(135deg, #10b981, #06b6d4);"></div>
+                  <span class="preview-name">Arjun M.</span>
+                </div>
+                <div class="preview-user">
+                  <div class="preview-avatar" style="background: linear-gradient(135deg, #ec4899, #6366f1);"></div>
+                  <span class="preview-name">Sara T.</span>
+                </div>
+              </div>
+              <div class="preview-chat">
+                <div class="preview-msg received">Hey! Ready for the standup? 👋</div>
+                <div class="preview-msg sent">Yes! Starting in 2 mins 🚀</div>
+                <div class="preview-msg received">Shared the doc in Drive ✅</div>
+                <div class="preview-msg sent">Got it! Looks great 💬</div>
+              </div>
+            </div>
+          </div>
 
-          <h3>Collaborate</h3>
+          <div class="hero-badge-float badge-float-1">
+            <div class="badge-float-icon">🟢</div>
+            <div class="badge-float-text">
+              <strong>248 Online</strong>
+              <span>Right now</span>
+            </div>
+          </div>
 
-          <p>Work together. Achieve more.</p>
+          <div class="hero-badge-float badge-float-2">
+            <div class="badge-float-icon">💬</div>
+            <div class="badge-float-text">
+              <strong>New Message</strong>
+              <span>from Priya ✨</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- ABOUT SECTION -->
-    <section id="about" class="section about-section">
-      <h2>About CollabSpace</h2>
+    <!-- ===================== STATS BAR ===================== -->
+    <div class="stats-bar">
+      <div class="stats-bar-item">
+        <div class="stats-bar-icon">👥</div>
+        <div>
+          <div class="stats-bar-number">12K+</div>
+          <div class="stats-bar-label">Active Users</div>
+        </div>
+      </div>
 
-      <p>
-        CollabSpace is designed to help people communicate, collaborate, and
-        work together easily.
-      </p>
-    </section>
+      <div class="stats-bar-divider"></div>
 
-    <!-- FEATURES SECTION -->
+      <div class="stats-bar-item">
+        <div class="stats-bar-icon">💬</div>
+        <div>
+          <div class="stats-bar-number">500K+</div>
+          <div class="stats-bar-label">Messages Daily</div>
+        </div>
+      </div>
+
+      <div class="stats-bar-divider"></div>
+
+      <div class="stats-bar-item">
+        <div class="stats-bar-icon">🌍</div>
+        <div>
+          <div class="stats-bar-number">45+</div>
+          <div class="stats-bar-label">Countries</div>
+        </div>
+      </div>
+
+      <div class="stats-bar-divider"></div>
+
+      <div class="stats-bar-item">
+        <div class="stats-bar-icon">⭐</div>
+        <div>
+          <div class="stats-bar-number">4.9/5</div>
+          <div class="stats-bar-label">User Rating</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== FEATURES SECTION ===================== -->
     <section id="features" class="section features-section">
-      <h2>Everything You Need To Collaborate</h2>
-
-      <div class="features-container">
-        <div class="feature-card">
-          <div class="feature-icon">💬</div>
-
-          <h3>Team Chat</h3>
-
-          <p>Chat with your team and friends in real time.</p>
+      <div class="section-inner">
+        <div class="text-center">
+          <div class="section-label">⚡ Features</div>
+          <h2 class="section-title">Everything You Need to <span class="gradient-text">Collaborate</span></h2>
+          <p class="section-desc center">Powerful tools designed to keep your team connected, productive, and in sync — no matter where they are.</p>
         </div>
 
-        <div class="feature-card">
-          <div class="feature-icon">👥</div>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon-wrap">💬</div>
+            <h3>Real-Time Chat</h3>
+            <p>Instant messaging with zero latency. Chat privately or in groups with beautiful, modern message bubbles.</p>
+          </div>
 
-          <h3>Communities</h3>
+          <div class="feature-card">
+            <div class="feature-icon-wrap">👥</div>
+            <h3>Team Communities</h3>
+            <p>Create dedicated spaces for your teams and communities. Organize conversations effortlessly.</p>
+          </div>
 
-          <p>Create communities and connect with people.</p>
-        </div>
+          <div class="feature-card">
+            <div class="feature-icon-wrap">🔒</div>
+            <h3>Secure & Private</h3>
+            <p>End-to-end security with user authentication. Your conversations stay private and protected.</p>
+          </div>
 
-        <div class="feature-card">
-          <div class="feature-icon">🚀</div>
+          <div class="feature-card">
+            <div class="feature-icon-wrap">🔔</div>
+            <h3>Smart Notifications</h3>
+            <p>Never miss an important message. Smart notification system with customizable preferences.</p>
+          </div>
 
-          <h3>Grow Together</h3>
+          <div class="feature-card">
+            <div class="feature-icon-wrap">🚀</div>
+            <h3>Lightning Fast</h3>
+            <p>Built on Socket.io for real-time delivery. Messages arrive instantly, without any delays.</p>
+          </div>
 
-          <p>Work together and achieve your goals faster.</p>
+          <div class="feature-card">
+            <div class="feature-icon-wrap">📱</div>
+            <h3>Fully Responsive</h3>
+            <p>Works seamlessly on desktop, tablet, and mobile. Collaborate from any device, anywhere.</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- CONTACT SECTION -->
-    <section id="contact" class="section contact-section">
-      <h2>Contact Us</h2>
+    <!-- ===================== ABOUT SECTION ===================== -->
+    <section id="about" class="section about-section">
+      <div class="section-inner">
+        <div class="about-grid">
+          <!-- Cards visual -->
+          <div class="about-visual">
+            <div class="about-card">
+              <div class="about-card-icon">🎯</div>
+              <div>
+                <h4>Built for Modern Teams</h4>
+                <p>Designed from the ground up for remote-first teams who need seamless communication tools.</p>
+              </div>
+            </div>
+            <div class="about-card">
+              <div class="about-card-icon">⚡</div>
+              <div>
+                <h4>Powered by Socket.io</h4>
+                <p>Real-time bidirectional event-based communication ensures your messages are delivered instantly.</p>
+              </div>
+            </div>
+            <div class="about-card">
+              <div class="about-card-icon">🛡️</div>
+              <div>
+                <h4>Privacy First</h4>
+                <p>Your data belongs to you. CollabSpace never shares or sells user information.</p>
+              </div>
+            </div>
+          </div>
 
-      <p>Have any questions? We would love to hear from you.</p>
+          <!-- Text content -->
+          <div class="about-content">
+            <div class="section-label">ℹ️ About Us</div>
+            <h2 class="section-title">Why Choose <span class="gradient-text">CollabSpace?</span></h2>
+            <p class="section-desc" style="margin-bottom: 28px;">
+              CollabSpace was built to solve the problem of scattered communication. We believe collaboration should be effortless, beautiful, and powerful.
+            </p>
 
-      <button id="contactButton">Contact Us</button>
+            <ul class="benefit-list">
+              <li class="benefit-item">
+                <div class="benefit-check">✓</div>
+                <span><strong>No setup hassle</strong> — Sign up and start chatting in seconds</span>
+              </li>
+              <li class="benefit-item">
+                <div class="benefit-check">✓</div>
+                <span><strong>Real-time everything</strong> — Messages, status, and typing indicators</span>
+              </li>
+              <li class="benefit-item">
+                <div class="benefit-check">✓</div>
+                <span><strong>Beautiful by design</strong> — A workspace you'll love to use every day</span>
+              </li>
+              <li class="benefit-item">
+                <div class="benefit-check">✓</div>
+                <span><strong>Open & extensible</strong> — Built for developers, designed for everyone</span>
+              </li>
+            </ul>
+
+            <a href="signup.html" class="btn-hero-primary" style="margin-top: 36px; display: inline-flex;">
+              Join CollabSpace Free →
+            </a>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <!-- FOOTER -->
+    <!-- ===================== LIVE DEMO SECTION ===================== -->
+    <section id="demo" class="section demo-section">
+      <div class="section-inner">
+        <div class="text-center">
+          <div class="section-label">💬 Interactive Demo</div>
+          <h2 class="section-title">Try the <span class="gradient-text">Live Chat</span> Demo</h2>
+          <p class="section-desc center">Experience the magic of CollabSpace right here. Type a message and see it in action!</p>
+        </div>
+
+        <div class="demo-wrapper">
+          <div class="demo-bar">
+            <div class="demo-dot"></div>
+            <div class="demo-dot"></div>
+            <div class="demo-dot"></div>
+            <span class="demo-label">CollabSpace — Live Demo</span>
+          </div>
+
+          <div class="demo-body">
+            <!-- Demo Sidebar -->
+            <div class="demo-sidebar">
+              <div class="demo-sidebar-title">Conversations</div>
+
+              <div class="demo-user-item active" onclick="selectDemoUser(this, 'Priya Singh', '🌸')">
+                <div class="demo-user-avatar" style="background: linear-gradient(135deg, #ec4899, #6366f1);">
+                  🌸
+                  <div class="demo-status-dot"></div>
+                </div>
+                <div class="demo-user-info">
+                  <div class="name">Priya Singh</div>
+                  <div class="preview">Online</div>
+                </div>
+              </div>
+
+              <div class="demo-user-item" onclick="selectDemoUser(this, 'Rahul Kumar', '👨‍💻')">
+                <div class="demo-user-avatar" style="background: linear-gradient(135deg, #06b6d4, #6366f1);">
+                  👨‍💻
+                  <div class="demo-status-dot"></div>
+                </div>
+                <div class="demo-user-info">
+                  <div class="name">Rahul Kumar</div>
+                  <div class="preview">Online</div>
+                </div>
+              </div>
+
+              <div class="demo-user-item" onclick="selectDemoUser(this, 'Arjun Mehta', '🚀')">
+                <div class="demo-user-avatar" style="background: linear-gradient(135deg, #10b981, #06b6d4);">
+                  🚀
+                </div>
+                <div class="demo-user-info">
+                  <div class="name">Arjun Mehta</div>
+                  <div class="preview">Away</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Demo Chat -->
+            <div class="demo-chat">
+              <div class="demo-chat-header">
+                <div class="demo-user-avatar" id="demoChatAvatar" style="background: linear-gradient(135deg, #ec4899, #6366f1); width:36px; height:36px;">🌸</div>
+                <div>
+                  <div class="demo-chat-title" id="demoChatTitle">Priya Singh</div>
+                  <div class="demo-chat-status">🟢 Online</div>
+                </div>
+              </div>
+
+              <div class="demo-messages" id="demoMessages">
+                <div class="demo-msg received">
+                  <div class="demo-msg-bubble">Hey! Welcome to CollabSpace 👋</div>
+                  <div class="demo-msg-time">10:00 AM</div>
+                </div>
+                <div class="demo-msg received">
+                  <div class="demo-msg-bubble">Try sending a message below! 💬</div>
+                  <div class="demo-msg-time">10:01 AM</div>
+                </div>
+              </div>
+
+              <div class="demo-input-area">
+                <input type="text" class="demo-input" id="demoInput" placeholder="Type a message... (Press Enter to send)" />
+                <button class="demo-send-btn" onclick="sendDemoMessage()" id="demoSendBtn">➤</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TESTIMONIALS ===================== -->
+    <section class="section testimonials-section">
+      <div class="section-inner">
+        <div class="text-center">
+          <div class="section-label">⭐ Testimonials</div>
+          <h2 class="section-title">What Our <span class="gradient-text">Users Say</span></h2>
+        </div>
+
+        <div class="testimonials-grid">
+          <div class="testimonial-card">
+            <div class="stars">★★★★★</div>
+            <p class="testimonial-text">"CollabSpace completely transformed how our remote team communicates. The real-time chat is lightning fast and the UI is absolutely stunning!"</p>
+            <div class="testimonial-author">
+              <div class="testimonial-avatar">👩‍💼</div>
+              <div>
+                <div class="testimonial-name">Ananya Sharma</div>
+                <div class="testimonial-role">Product Manager, TechCorp</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="stars">★★★★★</div>
+            <p class="testimonial-text">"The design is world-class. I've tried many chat apps but CollabSpace feels like it's from the future. My whole team switched in one day!"</p>
+            <div class="testimonial-author">
+              <div class="testimonial-avatar">👨‍💻</div>
+              <div>
+                <div class="testimonial-name">Vikram Patel</div>
+                <div class="testimonial-role">Lead Developer, StartupXYZ</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="stars">★★★★★</div>
+            <p class="testimonial-text">"Setup took under 5 minutes. The instant messaging with typing indicators makes it feel like everyone is in the same room. Absolutely love it!"</p>
+            <div class="testimonial-author">
+              <div class="testimonial-avatar">👩‍🎨</div>
+              <div>
+                <div class="testimonial-name">Neha Gupta</div>
+                <div class="testimonial-role">UI Designer, Creative Studio</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FAQ SECTION ===================== -->
+    <section class="section faq-section">
+      <div class="section-inner">
+        <div class="text-center">
+          <div class="section-label">❓ FAQ</div>
+          <h2 class="section-title">Frequently Asked <span class="gradient-text">Questions</span></h2>
+        </div>
+
+        <div class="faq-list" id="faqList">
+          <div class="faq-item">
+            <div class="faq-question">
+              Is CollabSpace free to use?
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">Yes! CollabSpace is completely free to sign up and start using. Our core real-time messaging features are available for everyone at no cost.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question">
+              How does real-time messaging work?
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">We use Socket.io — a powerful WebSocket library — to deliver messages in real-time with sub-100ms latency. Your messages appear instantly on the recipient's screen.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question">
+              Is my data secure?
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">Absolutely. CollabSpace uses secure authentication and your conversations are stored safely in our database. We never share or sell your data to third parties.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question">
+              Can I use it on mobile?
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">Yes! CollabSpace is fully responsive and works beautifully on mobile browsers. We're also working on dedicated mobile apps coming soon!</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question">
+              How many users can chat simultaneously?
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">CollabSpace supports thousands of concurrent users. Our Socket.io backend is designed for high concurrency with efficient room-based messaging architecture.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CONTACT / CTA SECTION ===================== -->
+    <section id="contact" class="contact-section">
+      <div class="cta-card">
+        <div class="section-label" style="margin: 0 auto 20px; display: inline-flex;">📬 Get In Touch</div>
+        <h2 class="section-title">Ready to <span class="gradient-text">Get Started?</span></h2>
+        <p class="section-desc" style="margin: 16px auto 40px;">Join thousands of teams already using CollabSpace. Sign up for free and experience the future of collaboration.</p>
+        <div class="cta-buttons">
+          <a href="signup.html" class="btn-hero-primary">🚀 Create Free Account</a>
+          <button class="btn-hero-secondary" id="contactModalBtn">📬 Contact Us</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Modal -->
+    <div class="modal-overlay" id="contactModal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 class="modal-title">Send us a message 💌</h3>
+          <button class="modal-close" id="closeModalBtn">✕</button>
+        </div>
+        <form id="contactForm">
+          <div class="form-group">
+            <label class="form-label">Your Name</label>
+            <input type="text" class="form-input" id="contactName" placeholder="Enter your name" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" class="form-input" id="contactEmail" placeholder="Enter your email" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Message</label>
+            <textarea class="form-input" id="contactMessage" placeholder="Your message..." required style="height: 120px; resize: vertical;"></textarea>
+          </div>
+          <button type="submit" class="btn-submit">Send Message ✉️</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===================== FOOTER ===================== -->
     <footer>
-      <p>© 2026 CollabSpace. All Rights Reserved.</p>
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">💬 CollabSpace</div>
+          <p>A modern real-time collaboration platform built for teams, friends, and communities who want to connect and communicate effortlessly.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#demo">Live Demo</a></li>
+            <li><a href="signup.html">Sign Up</a></li>
+            <li><a href="login.html">Login</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 CollabSpace. All Rights Reserved.</p>
+        <p>Made with ❤️ for modern teams</p>
+      </div>
     </footer>
 
-    <!-- JAVASCRIPT FILE -->
     <script src="script.js"></script>
   </body>
 </html>

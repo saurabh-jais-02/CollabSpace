@@ -2,100 +2,254 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+    <meta name="description" content="Create your free CollabSpace account and start collaborating in real-time." />
     <title>Sign Up | CollabSpace</title>
-
     <link rel="stylesheet" href="style.css" />
   </head>
 
   <body>
-    <div class="auth-page">
-      <div class="auth-box">
-        <h1>Create Account</h1>
 
-        <p>Join CollabSpace today</p>
+    <!-- TOAST -->
+    <div id="toast-container"></div>
+
+    <div class="auth-page">
+      <!-- Ambient orbs -->
+      <div class="auth-orbs">
+        <div class="auth-orb auth-orb-1"></div>
+        <div class="auth-orb auth-orb-2"></div>
+      </div>
+
+      <!-- LEFT PANEL: Branding -->
+      <div class="auth-left">
+        <a href="index.html" class="auth-brand">
+          <div class="auth-brand-icon">💬</div>
+          <span class="auth-brand-name">CollabSpace</span>
+        </a>
+
+        <h1 class="auth-left-tagline">
+          Join thousands of<br>
+          <span class="gradient-text">collaborative teams.</span>
+        </h1>
+
+        <p class="auth-left-desc">
+          Create your free account and unlock real-time messaging, team channels, and everything you need to collaborate beautifully.
+        </p>
+
+        <div class="auth-features">
+          <div class="auth-feature">
+            <div class="auth-feature-icon">🎁</div>
+            <p><strong>100% Free</strong> — no credit card required</p>
+          </div>
+          <div class="auth-feature">
+            <div class="auth-feature-icon">⚡</div>
+            <p><strong>Ready in seconds</strong> — start chatting instantly</p>
+          </div>
+          <div class="auth-feature">
+            <div class="auth-feature-icon">🔒</div>
+            <p><strong>Your data is safe</strong> — we never sell your info</p>
+          </div>
+          <div class="auth-feature">
+            <div class="auth-feature-icon">🌍</div>
+            <p><strong>12,000+ users</strong> already collaborating</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL: Signup Form -->
+      <div class="auth-right">
+        <h2 class="auth-form-title">Create Account ✨</h2>
+        <p class="auth-form-subtitle">Join CollabSpace today — it's free!</p>
 
         <!-- SIGNUP FORM -->
         <form id="signupForm">
-          <input type="text" id="name" placeholder="Full Name" required />
+          <div class="form-group">
+            <label class="form-label" for="name">Full Name</label>
+            <input
+              type="text"
+              id="name"
+              class="form-input"
+              placeholder="Your full name"
+              required
+              autocomplete="name"
+            />
+          </div>
 
-          <input type="email" id="email" placeholder="Email Address" required />
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              class="form-input"
+              placeholder="you@example.com"
+              required
+              autocomplete="email"
+            />
+          </div>
 
-          <input
-            type="password"
-            id="password"
-            placeholder="Create Password"
-            required
-          />
+          <div class="form-group">
+            <label class="form-label" for="password">Create Password</label>
+            <div class="form-input-wrap">
+              <input
+                type="password"
+                id="password"
+                class="form-input"
+                placeholder="Create a strong password"
+                required
+                autocomplete="new-password"
+                oninput="checkPasswordStrength(this.value)"
+              />
+              <button type="button" class="input-toggle" id="togglePassword" aria-label="Show password">
+                👁️
+              </button>
+            </div>
+            <!-- Password Strength -->
+            <div class="strength-bar">
+              <div class="strength-fill" id="strengthFill"></div>
+            </div>
+            <div class="strength-text" id="strengthText">Enter a password</div>
+          </div>
 
-          <button type="submit">Create Account</button>
+          <button type="submit" class="btn-submit" id="signupSubmitBtn">
+            <span id="signupBtnText">🚀 Create My Account</span>
+          </button>
         </form>
 
-        <p>
+        <p class="auth-footer-text" style="margin-top: 28px;">
           Already have an account?
-
-          <a href="login.html"> Login </a>
+          <a href="login.html">Login here →</a>
         </p>
 
-        <a href="index.html"> ← Back to Home </a>
+        <a href="index.html" class="auth-back">
+          ← Back to Home
+        </a>
       </div>
     </div>
 
-    <!-- JAVASCRIPT -->
-
     <script>
-      const signupForm = document.getElementById("signupForm");
+      // ========================
+      // TOAST SYSTEM
+      // ========================
+      function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const icons = { success: '✅', error: '❌', info: '💬', warning: '⚠️' };
 
-      signupForm.addEventListener("submit", async function (event) {
-        // Page reload ko rokna
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+          <span class="toast-icon">${icons[type]}</span>
+          <span class="toast-message">${message}</span>
+        `;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+          toast.classList.add('hide');
+          setTimeout(() => toast.remove(), 300);
+        }, 3500);
+      }
+
+      // ========================
+      // PASSWORD TOGGLE
+      // ========================
+      const togglePassword = document.getElementById('togglePassword');
+      const passwordInput = document.getElementById('password');
+
+      togglePassword.addEventListener('click', () => {
+        const isText = passwordInput.type === 'text';
+        passwordInput.type = isText ? 'password' : 'text';
+        togglePassword.textContent = isText ? '👁️' : '🙈';
+      });
+
+      // ========================
+      // PASSWORD STRENGTH METER
+      // ========================
+      function checkPasswordStrength(value) {
+        const fill = document.getElementById('strengthFill');
+        const text = document.getElementById('strengthText');
+
+        const hasLength = value.length >= 8;
+        const hasUpper = /[A-Z]/.test(value);
+        const hasNumber = /[0-9]/.test(value);
+        const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+
+        const score = [hasLength, hasUpper, hasNumber, hasSpecial].filter(Boolean).length;
+
+        fill.className = 'strength-fill';
+        text.className = 'strength-text';
+
+        if (value.length === 0) {
+          fill.style.width = '0%';
+          text.textContent = 'Enter a password';
+          return;
+        }
+
+        if (score <= 1) {
+          fill.classList.add('weak');
+          text.classList.add('weak');
+          text.textContent = '⚠️ Weak password';
+        } else if (score === 2 || score === 3) {
+          fill.classList.add('medium');
+          text.classList.add('medium');
+          text.textContent = '🔶 Medium strength';
+        } else {
+          fill.classList.add('strong');
+          text.classList.add('strong');
+          text.textContent = '✅ Strong password!';
+        }
+      }
+
+      // ========================
+      // SIGNUP FORM SUBMIT
+      // ========================
+      const signupForm = document.getElementById('signupForm');
+      const signupSubmitBtn = document.getElementById('signupSubmitBtn');
+      const signupBtnText = document.getElementById('signupBtnText');
+
+      signupForm.addEventListener('submit', async function (event) {
         event.preventDefault();
 
-        // Input values lena
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
 
-        const name = document.getElementById("name").value;
+        if (!name || !email || !password) {
+          showToast('Please fill in all fields ⚠️', 'warning');
+          return;
+        }
 
-        const email = document.getElementById("email").value;
+        if (password.length < 6) {
+          showToast('Password must be at least 6 characters ⚠️', 'warning');
+          return;
+        }
 
-        const password = document.getElementById("password").value;
+        // Show loading state
+        signupSubmitBtn.disabled = true;
+        signupBtnText.textContent = 'Creating account...';
 
         try {
-          // Backend API ko request
-
-          const response = await fetch("http://localhost:3000/api/signup", {
-            method: "POST",
-
-            headers: {
-              "Content-Type": "application/json",
-            },
-
-            body: JSON.stringify({
-              name: name,
-
-              email: email,
-
-              password: password,
-            }),
+          const response = await fetch('http://localhost:3000/api/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password }),
           });
-
-          // Backend response
 
           const data = await response.json();
 
-          // Message show
-
-          alert(data.message);
-
-          // Signup successful
-
           if (response.ok) {
-            window.location.href = "login.html";
+            showToast('Account created successfully! Redirecting to login ✅', 'success');
+            setTimeout(() => {
+              window.location.href = 'login.html';
+            }, 1500);
+          } else {
+            showToast(data.message || 'Signup failed. Please try again ❌', 'error');
+            signupSubmitBtn.disabled = false;
+            signupBtnText.textContent = '🚀 Create My Account';
           }
         } catch (error) {
-          console.log(error);
-
-          alert("Server se connection nahi ho pa raha ❌");
+          console.error(error);
+          showToast('Cannot connect to server. Please try again ❌', 'error');
+          signupSubmitBtn.disabled = false;
+          signupBtnText.textContent = '🚀 Create My Account';
         }
       });
     </script>

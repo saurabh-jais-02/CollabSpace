@@ -2,106 +2,216 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+    <meta name="description" content="Login to CollabSpace - Your real-time collaboration workspace." />
     <title>Login | CollabSpace</title>
-
     <link rel="stylesheet" href="style.css" />
   </head>
 
   <body>
+
+    <!-- TOAST -->
+    <div id="toast-container"></div>
+
     <div class="auth-page">
-      <div class="auth-box">
-        <h1>Welcome Back</h1>
+      <!-- Ambient background orbs -->
+      <div class="auth-orbs">
+        <div class="auth-orb auth-orb-1"></div>
+        <div class="auth-orb auth-orb-2"></div>
+      </div>
 
-        <p>Login to your CollabSpace account</p>
+      <!-- LEFT PANEL: Branding -->
+      <div class="auth-left">
+        <a href="index.html" class="auth-brand">
+          <div class="auth-brand-icon">💬</div>
+          <span class="auth-brand-name">CollabSpace</span>
+        </a>
 
-        <!-- LOGIN FORM -->
+        <h1 class="auth-left-tagline">
+          Welcome back to<br>
+          <span class="gradient-text">your workspace.</span>
+        </h1>
 
-        <form id="loginForm">
-          <input type="email" id="email" placeholder="Enter Email" required />
-
-          <input
-            type="password"
-            id="password"
-            placeholder="Enter Password"
-            required
-          />
-
-          <button type="submit">Login</button>
-        </form>
-
-        <p>
-          Don't have an account?
-
-          <a href="signup.html"> Sign Up </a>
+        <p class="auth-left-desc">
+          Sign in to access your real-time chats, team conversations, and collaborative workspace — all in one beautiful place.
         </p>
 
-        <a href="index.html"> ← Back to Home </a>
+        <div class="auth-features">
+          <div class="auth-feature">
+            <div class="auth-feature-icon">⚡</div>
+            <p><strong>Instant messaging</strong> with zero latency</p>
+          </div>
+          <div class="auth-feature">
+            <div class="auth-feature-icon">🔒</div>
+            <p><strong>Secure login</strong> with JWT authentication</p>
+          </div>
+          <div class="auth-feature">
+            <div class="auth-feature-icon">🌍</div>
+            <p><strong>Connect globally</strong> with your entire team</p>
+          </div>
+          <div class="auth-feature">
+            <div class="auth-feature-icon">📱</div>
+            <p><strong>Works everywhere</strong> — desktop & mobile</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL: Login Form -->
+      <div class="auth-right">
+        <h2 class="auth-form-title">Welcome Back 👋</h2>
+        <p class="auth-form-subtitle">Login to your CollabSpace account</p>
+
+        <!-- LOGIN FORM -->
+        <form id="loginForm">
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              class="form-input"
+              placeholder="you@example.com"
+              required
+              autocomplete="email"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <div class="form-input-wrap">
+              <input
+                type="password"
+                id="password"
+                class="form-input"
+                placeholder="Enter your password"
+                required
+                autocomplete="current-password"
+              />
+              <button type="button" class="input-toggle" id="togglePassword" aria-label="Show password">
+                👁️
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit" id="loginSubmitBtn">
+            <span id="loginBtnText">Login to CollabSpace</span>
+          </button>
+        </form>
+
+        <div class="auth-divider">
+          <div class="auth-divider-line"></div>
+          <span class="auth-divider-text">or try</span>
+          <div class="auth-divider-line"></div>
+        </div>
+
+        <!-- DEMO LOGIN -->
+        <button type="button" class="btn-demo" id="demoLoginBtn">
+          🚀 Quick Demo Login
+        </button>
+
+        <p class="auth-footer-text" style="margin-top: 28px;">
+          Don't have an account?
+          <a href="signup.html">Create one free →</a>
+        </p>
+
+        <a href="index.html" class="auth-back">
+          ← Back to Home
+        </a>
       </div>
     </div>
 
-    <!-- JAVASCRIPT -->
-
     <script>
-      const loginForm = document.getElementById("loginForm");
+      // ========================
+      // TOAST SYSTEM
+      // ========================
+      function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const icons = { success: '✅', error: '❌', info: '💬', warning: '⚠️' };
 
-      loginForm.addEventListener("submit", async function (event) {
-        // Page reload ko rokna
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+          <span class="toast-icon">${icons[type]}</span>
+          <span class="toast-message">${message}</span>
+        `;
 
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.classList.add('hide');
+          setTimeout(() => toast.remove(), 300);
+        }, 3500);
+      }
+
+      // ========================
+      // PASSWORD TOGGLE
+      // ========================
+      const togglePassword = document.getElementById('togglePassword');
+      const passwordInput = document.getElementById('password');
+
+      togglePassword.addEventListener('click', () => {
+        const isText = passwordInput.type === 'text';
+        passwordInput.type = isText ? 'password' : 'text';
+        togglePassword.textContent = isText ? '👁️' : '🙈';
+      });
+
+      // ========================
+      // DEMO LOGIN
+      // ========================
+      document.getElementById('demoLoginBtn').addEventListener('click', async () => {
+        document.getElementById('email').value = 'demo@collabspace.io';
+        document.getElementById('password').value = 'Demo@1234';
+        showToast('Demo credentials filled! Logging in... 🚀', 'info');
+        setTimeout(() => {
+          document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+        }, 800);
+      });
+
+      // ========================
+      // LOGIN FORM SUBMIT
+      // ========================
+      const loginForm = document.getElementById('loginForm');
+      const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+      const loginBtnText = document.getElementById('loginBtnText');
+
+      loginForm.addEventListener('submit', async function (event) {
         event.preventDefault();
 
-        // Input values lena
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
 
-        const email = document.getElementById("email").value;
+        if (!email || !password) {
+          showToast('Please fill in all fields ⚠️', 'warning');
+          return;
+        }
 
-        const password = document.getElementById("password").value;
+        // Show loading state
+        loginSubmitBtn.disabled = true;
+        loginBtnText.textContent = 'Logging in...';
 
         try {
-          // Backend login API
-
-          const response = await fetch("http://localhost:3000/api/login", {
-            method: "POST",
-
-            headers: {
-              "Content-Type": "application/json",
-            },
-
-            body: JSON.stringify({
-              email: email,
-
-              password: password,
-            }),
+          const response = await fetch('http://localhost:3000/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
           });
-
-          // Backend response
 
           const data = await response.json();
 
-          // Message show
-
-          alert(data.message);
-
-          // Login successful
-
           if (response.ok) {
-            // User information save
-
-            localStorage.setItem(
-              "user",
-
-              JSON.stringify(data.user),
-            );
-
-            // Home page par redirect
-
-            window.location.href = "dashboard.html";
+            showToast('Login successful! Redirecting... ✅', 'success');
+            localStorage.setItem('user', JSON.stringify(data.user));
+            setTimeout(() => {
+              window.location.href = 'dashboard.html';
+            }, 1000);
+          } else {
+            showToast(data.message || 'Invalid email or password ❌', 'error');
+            loginSubmitBtn.disabled = false;
+            loginBtnText.textContent = 'Login to CollabSpace';
           }
         } catch (error) {
-          console.log(error);
-
-          alert("Server se connection nahi ho pa raha ❌");
+          console.error(error);
+          showToast('Cannot connect to server. Please try again ❌', 'error');
+          loginSubmitBtn.disabled = false;
+          loginBtnText.textContent = 'Login to CollabSpace';
         }
       });
     </script>

@@ -1,0 +1,14 @@
+// ===============================
+// routes/userRoutes.js
+// User Routes: /api/users
+// ===============================
+
+const express = require("express");
+const router = express.Router();
+
+const { getAllUsers } = require("../controllers/userController");
+
+// GET /api/users
+router.get("/users", getAllUsers);
+
+module.exports = router;
