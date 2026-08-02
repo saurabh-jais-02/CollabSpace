@@ -87,6 +87,38 @@
             />
           </div>
 
+          <!-- USER ID FIELD -->
+          <div class="form-group">
+            <label class="form-label" for="customUID">
+              🪪 Choose Your User ID
+              <span style="font-size:11px; font-weight:400; color:#64748b; margin-left:6px;">(Others use this to find you)</span>
+            </label>
+            <div class="form-input-wrap" style="position:relative;">
+              <span style="
+                position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+                font-size: 14px; font-weight: 700; color: #6366f1; pointer-events: none;
+                letter-spacing: 1px; z-index:2;
+              " id="uidPrefixLabel">CS-</span>
+              <input
+                type="text"
+                id="customUID"
+                class="form-input"
+                placeholder="YOURNAME"
+                maxlength="12"
+                autocomplete="off"
+                spellcheck="false"
+                style="padding-left: 46px; letter-spacing: 2px; font-weight: 700; text-transform: uppercase; font-family: 'Courier New', monospace;"
+              />
+            </div>
+            <div id="uidStatus" style="
+              font-size: 12px; margin-top: 6px; min-height: 18px;
+              font-weight: 600; letter-spacing: 0.3px; transition: all 0.2s;
+            "></div>
+            <div style="font-size:11px; color:#64748b; margin-top:3px;">
+              4–12 letters or numbers only (e.g. CS-RAHUL, CS-A3K9XZ)
+            </div>
+          </div>
+
           <div class="form-group">
             <label class="form-label" for="password">Create Password</label>
             <div class="form-input-wrap">
@@ -147,6 +179,60 @@
           setTimeout(() => toast.remove(), 300);
         }, 3500);
       }
+
+      // ========================
+      // USER ID AVAILABILITY CHECK
+      // ========================
+      const customUIDInput = document.getElementById('customUID');
+      const uidStatus = document.getElementById('uidStatus');
+      let uidCheckTimer = null;
+      let uidIsAvailable = null; // null = not checked, true/false
+
+      // Auto-uppercase & strip CS- if user typed it
+      customUIDInput.addEventListener('input', function () {
+        let val = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        // Remove CS prefix if user types it
+        if (val.startsWith('CS')) val = val.replace(/^CS-?/, '');
+        this.value = val;
+
+        uidIsAvailable = null;
+        clearTimeout(uidCheckTimer);
+
+        if (!val) {
+          uidStatus.textContent = '';
+          return;
+        }
+
+        const fullUID = 'CS-' + val;
+
+        if (val.length < 4) {
+          uidStatus.style.color = '#f59e0b';
+          uidStatus.textContent = '⚠️ Minimum 4 characters needed';
+          return;
+        }
+
+        uidStatus.style.color = '#64748b';
+        uidStatus.textContent = '⏳ Checking availability...';
+
+        uidCheckTimer = setTimeout(async () => {
+          try {
+            const res = await fetch(`http://localhost:3000/api/check-uid/${encodeURIComponent(fullUID)}`);
+            const data = await res.json();
+            uidIsAvailable = data.available;
+            if (data.available) {
+              uidStatus.style.color = '#10b981';
+              uidStatus.textContent = `✅ "${fullUID}" is available!`;
+            } else {
+              uidStatus.style.color = '#ef4444';
+              uidStatus.textContent = `❌ "${fullUID}" is already taken`;
+            }
+          } catch {
+            uidStatus.style.color = '#64748b';
+            uidStatus.textContent = '⚠️ Cannot check availability (server offline)';
+            uidIsAvailable = null;
+          }
+        }, 600);
+      });
 
       // ========================
       // PASSWORD TOGGLE
@@ -211,6 +297,8 @@
         const name = document.getElementById('name').value.trim();
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
+        const rawUID = customUIDInput.value.trim().toUpperCase();
+        const customUID = rawUID ? 'CS-' + rawUID : '';
 
         if (!name || !email || !password) {
           showToast('Please fill in all fields ⚠️', 'warning');
@@ -222,6 +310,20 @@
           return;
         }
 
+        // Validate UID if provided
+        if (rawUID) {
+          if (rawUID.length < 4) {
+            showToast('User ID must be at least 4 characters ⚠️', 'warning');
+            customUIDInput.focus();
+            return;
+          }
+          if (uidIsAvailable === false) {
+            showToast('That User ID is already taken. Please choose another ❌', 'error');
+            customUIDInput.focus();
+            return;
+          }
+        }
+
         // Show loading state
         signupSubmitBtn.disabled = true;
         signupBtnText.textContent = 'Creating account...';
@@ -230,16 +332,48 @@
           const response = await fetch('http://localhost:3000/api/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, password }),
+            body: JSON.stringify({ name, email, password, customUID }),
           });
 
           const data = await response.json();
 
           if (response.ok) {
-            showToast('Account created successfully! Redirecting to login ✅', 'success');
+            // Show UID reveal card!
+            const uid = data.uid || 'CS-XXXXXX';
+
+            // Hide form, show UID card
+            signupForm.style.display = 'none';
+            document.querySelector('.auth-form-title').textContent = 'Account Created! 🎉';
+            document.querySelector('.auth-form-subtitle').textContent = 'Your unique CollabSpace ID:';
+
+            const uidCard = document.createElement('div');
+            uidCard.style.cssText = `
+              background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(6,182,212,0.15));
+              border: 1px solid rgba(99,102,241,0.4);
+              border-radius: 16px;
+              padding: 24px;
+              text-align: center;
+              margin-bottom: 24px;
+              animation: fadeIn 0.4s ease;
+            `;
+            uidCard.innerHTML = `
+              <div style="font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#06b6d4; margin-bottom:12px;">🪪 Your User ID</div>
+              <div style="font-family:'Outfit',monospace; font-size:26px; font-weight:800; letter-spacing:4px; color:#fff; background:rgba(0,0,0,0.3); padding:12px 20px; border-radius:10px; margin-bottom:12px;" id="newUID">${uid}</div>
+              <button onclick="copyNewUID('${uid}')" style="background:rgba(99,102,241,0.3); border:1px solid rgba(99,102,241,0.5); border-radius:8px; padding:8px 20px; color:white; font-size:13px; font-weight:600; cursor:pointer; margin-bottom:16px;" id="copyNewUIDBtn">📋 Copy ID</button>
+              <div style="font-size:12px; color:#94a3b8; line-height:1.6;">
+                Share this ID with anyone so they<br>can find and message you directly!
+              </div>
+            `;
+
+            const authRight = document.querySelector('.auth-right');
+            authRight.insertBefore(uidCard, authRight.querySelector('p.auth-footer-text'));
+
+            showToast(`Welcome to CollabSpace! Your ID: ${uid} 🎉`, 'success');
+
             setTimeout(() => {
               window.location.href = 'login.html';
-            }, 1500);
+            }, 5000);
+
           } else {
             showToast(data.message || 'Signup failed. Please try again ❌', 'error');
             signupSubmitBtn.disabled = false;
@@ -252,6 +386,17 @@
           signupBtnText.textContent = '🚀 Create My Account';
         }
       });
+      // ========================
+      // COPY NEW UID HELPER
+      // ========================
+      function copyNewUID(uid) {
+        navigator.clipboard.writeText(uid).then(() => {
+          const btn = document.getElementById('copyNewUIDBtn');
+          if (btn) { btn.textContent = '✅ Copied!'; }
+          showToast(`ID copied: ${uid} 📋`, 'success');
+          setTimeout(() => { if (btn) btn.textContent = '📋 Copy ID'; }, 2000);
+        });
+      }
     </script>
   </body>
 </html>

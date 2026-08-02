@@ -21,11 +21,23 @@ const socketHandler = (io) => {
     socket.on("sendMessage", (data) => {
       console.log("Message received:", data);
 
-      // Send to receiver
+      // Deliver to receiver's room
       io.to("user_" + data.receiverId).emit("receiveMessage", data);
 
-      // Confirm to sender
-      socket.emit("messageSent", data);
+      // ✓✓ Double tick — confirm delivery back to sender
+      socket.emit("messageDelivered", { msgId: data.msgId });
+    });
+
+    // ===============================
+    // READ RECEIPT
+    // When receiver opens a chat, tell the original sender their msgs are read
+    // ===============================
+    socket.on("messageRead", (data) => {
+      // data: { originalSenderId, readBy }
+      io.to("user_" + data.originalSenderId).emit("messagesRead", {
+        readBy: data.readBy,
+      });
+      console.log(`Messages read: user_${data.readBy} read messages from user_${data.originalSenderId}`);
     });
 
     // ===============================

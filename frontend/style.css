@@ -2363,3 +2363,212 @@ footer {
   .users-panel { width: 100%; max-width: 280px; }
   .hero-stats { gap: 20px; }
 }
+
+/* ============================================
+   UID CARD — Your Unique ID
+============================================ */
+.my-uid-card {
+  margin: 10px 16px 4px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(6,182,212,0.1) 100%);
+  border: 1px solid rgba(99,102,241,0.3);
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+}
+
+.my-uid-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+  margin-bottom: 8px;
+}
+
+.my-uid-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.my-uid-value {
+  font-family: 'Outfit', monospace;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 2px;
+  flex: 1;
+  background: rgba(0,0,0,0.3);
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.my-uid-copy {
+  background: rgba(99,102,241,0.25);
+  border: 1px solid rgba(99,102,241,0.4);
+  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.my-uid-copy:hover {
+  background: rgba(99,102,241,0.5);
+  transform: scale(1.1);
+}
+
+.my-uid-hint {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  text-align: center;
+}
+
+/* ============================================
+   UID SEARCH SECTION
+============================================ */
+.uid-search-section {
+  padding: 0 16px 8px;
+}
+
+.uid-search-wrap {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.uid-search-input {
+  flex: 1;
+  background: var(--bg-tertiary);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 9px 12px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: 'Outfit', monospace;
+  font-weight: 600;
+  letter-spacing: 1px;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.uid-search-input:focus {
+  border-color: var(--accent-indigo);
+}
+
+.uid-search-input::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.uid-search-btn {
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.uid-search-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(99,102,241,0.5);
+}
+
+/* UID Search Results */
+.uid-searching {
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 10px 0 4px;
+  text-align: center;
+}
+
+.uid-not-found {
+  font-size: 12px;
+  color: #f87171;
+  padding: 8px 0 4px;
+  text-align: center;
+}
+
+.uid-found-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.3);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-top: 8px;
+  animation: fadeIn 0.3s ease;
+}
+
+.uid-found-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.uid-found-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.uid-found-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.uid-found-uid {
+  font-size: 11px;
+  color: var(--accent-emerald);
+  font-family: 'Outfit', monospace;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+.uid-chat-btn {
+  background: var(--accent-emerald);
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.uid-chat-btn:hover {
+  background: #059669;
+  transform: scale(1.05);
+}
+

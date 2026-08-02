@@ -26,14 +26,24 @@ const PORT = process.env.PORT || 3000;
 // ===============================
 // MIDDLEWARE
 // ===============================
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 app.use(express.json());
+
+// ===============================
+// SERVE FRONTEND (Static Files)
+// ===============================
+const path = require("path");
+app.use(express.static(path.join(__dirname, "../frontend")));
 
 // ===============================
 // ROUTES
 // ===============================
 app.get("/", (req, res) => {
-  res.send("CollabSpace Backend is Running 🚀");
+  res.sendFile(path.join(__dirname, "../frontend/index.html"));
 });
 
 app.get("/api/test", (req, res) => {
@@ -42,6 +52,21 @@ app.get("/api/test", (req, res) => {
 
 app.use("/api", authRoutes);
 app.use("/api", userRoutes);
+
+// ===============================
+// 404 HANDLER
+// ===============================
+app.use((req, res) => {
+  res.status(404).json({ message: "Route not found ❌" });
+});
+
+// ===============================
+// GLOBAL ERROR HANDLER
+// ===============================
+app.use((err, req, res, next) => {
+  console.error("❌ Unhandled express error:", err.message);
+  res.status(500).json({ message: "Internal server error ❌" });
+});
 
 // ===============================
 // HTTP SERVER
@@ -56,6 +81,8 @@ const io = new Server(server, {
     origin: "*",
     methods: ["GET", "POST"],
   },
+  pingTimeout: 60000,
+  pingInterval: 25000,
 });
 
 socketHandler(io);
@@ -64,5 +91,17 @@ socketHandler(io);
 // START SERVER
 // ===============================
 server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
+});
+
+// ===============================
+// CRASH PREVENTION
+// Prevents server from dying on unhandled errors
+// ===============================
+process.on("uncaughtException", (err) => {
+  console.error("💥 Uncaught Exception (server kept alive):", err.message);
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("💥 Unhandled Promise Rejection (server kept alive):", reason);
 });

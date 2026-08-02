@@ -1,10 +1,12 @@
 {
   "name": "collabspace",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Real-time collaboration platform",
+  "main": "backend/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node backend/server.js",
+    "dev": "node node_modules/nodemon/bin/nodemon.js backend/server.js",
+    "dev:watch": "node node_modules/nodemon/bin/nodemon.js --watch backend backend/server.js"
   },
   "keywords": [],
   "author": "",
@@ -16,5 +18,8 @@
     "express": "^5.2.1",
     "mysql2": "^3.23.1",
     "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }

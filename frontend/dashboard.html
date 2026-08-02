@@ -7,6 +7,61 @@
     <link rel="stylesheet" href="style.css" />
     <!-- SOCKET.IO -->
     <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <style>
+      /* ── WhatsApp-style Message Ticks ── */
+      .msg-ticks {
+        display: inline-flex;
+        align-items: center;
+        gap: 0px;
+        margin-left: 4px;
+        font-size: 13px;
+        line-height: 1;
+        vertical-align: middle;
+      }
+      .msg-ticks .t1,
+      .msg-ticks .t2 {
+        color: rgba(255,255,255,0.45);
+        font-size: 13px;
+        line-height: 1;
+        transition: color 0.3s ease;
+      }
+      .msg-ticks .t2 { margin-left: -5px; display: none; }
+
+      /* Double tick (delivered) */
+      .msg-ticks.delivered .t2 { display: inline; }
+
+      /* Blue ticks (read) */
+      .msg-ticks.read .t1,
+      .msg-ticks.read .t2 { color: #38bdf8; display: inline; }
+
+      /* ── Unread Badge ── */
+      .user-item-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+      }
+      .unread-badge {
+        min-width: 20px;
+        height: 20px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 700;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 0 5px;
+        flex-shrink: 0;
+        animation: badgePop 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        box-shadow: 0 2px 8px rgba(99,102,241,0.5);
+      }
+      @keyframes badgePop {
+        from { transform: scale(0); opacity: 0; }
+        to   { transform: scale(1); opacity: 1; }
+      }
+    </style>
   </head>
 
   <body>
@@ -84,8 +139,34 @@
           </select>
         </div>
 
+        <!-- MY UNIQUE ID CARD -->
+        <div class="my-uid-card" id="myUIDCard">
+          <div class="my-uid-label">🪪 Your Unique ID</div>
+          <div class="my-uid-row">
+            <span class="my-uid-value" id="myUIDValue">Loading...</span>
+            <button class="my-uid-copy" id="copyUIDBtn" title="Copy ID">📋</button>
+          </div>
+          <div class="my-uid-hint">Share this ID so others can find you</div>
+        </div>
+
+        <!-- FIND BY UID -->
+        <div class="uid-search-section">
+          <div class="users-section-title">🔍 Find by User ID</div>
+          <div class="uid-search-wrap">
+            <input
+              type="text"
+              id="uidSearchInput"
+              class="uid-search-input"
+              placeholder="Paste ID e.g. CS-A3K9XZ"
+              maxlength="9"
+            />
+            <button class="uid-search-btn" id="uidSearchBtn">→</button>
+          </div>
+          <div id="uidSearchResult"></div>
+        </div>
+
         <!-- Users List -->
-        <div class="users-section-title">Direct Messages</div>
+        <div class="users-section-title">💬 Direct Messages</div>
         <div class="users-list" id="usersList"></div>
       </aside>
 
@@ -244,6 +325,8 @@
         socket = io('http://localhost:3000');
         socket.on('connect', () => {
           showToast('Connected to CollabSpace 🟢', 'success');
+          // Re-join room on reconnect
+          if (user) socket.emit('join', user.id);
         });
         socket.on('connect_error', () => {
           showToast('Running in offline mode 📴', 'warning');
@@ -264,6 +347,14 @@
         document.getElementById('currentUserName').textContent = user.name;
         if (socket) socket.emit('join', user.id);
         showToast(`Welcome back, ${user.name}! 👋`, 'success');
+
+        // Show UID
+        const uidEl = document.getElementById('myUIDValue');
+        if (user.uid) {
+          uidEl.textContent = user.uid;
+        } else {
+          uidEl.textContent = 'N/A';
+        }
       }
 
       // ============================================
@@ -295,6 +386,11 @@
 
       let allUsers = [];
       let selectedUser = null;
+
+      // ── Unread counts per user (key = userId) ──
+      const unreadCounts = {};
+      // ── Sent message tick elements (key = msgId) ──
+      const sentMessages = new Map();
 
       // ============================================
       // LOAD USERS
@@ -328,7 +424,11 @@
         let count = 0;
 
         users.forEach(function (person) {
-          if (user && Number(person.id) === Number(user.id)) return;
+          // Skip the logged-in user — match by BOTH id AND email to handle duplicate names
+          if (user && (
+            Number(person.id) === Number(user.id) ||
+            person.email === user.email
+          )) return;
           count++;
 
           const avatarColors = [
@@ -343,15 +443,21 @@
 
           const userItem = document.createElement('div');
           userItem.className = 'user-item';
-          userItem.dataset.name = person.name;
+          userItem.dataset.name   = person.name;
+          userItem.dataset.userId = person.id;
           userItem.innerHTML = `
-            <div class="user-item-avatar" style="background: ${color}; color: white; font-size: 16px; font-weight: 700;">
-              ${initial}
-              <div class="status-dot online" style="position:absolute; bottom:1px; right:1px; width:10px; height:10px; border:2px solid var(--bg-secondary);"></div>
-            </div>
-            <div>
-              <div class="user-item-name">${escapeHtml(person.name)}</div>
-              <div class="user-item-email">${escapeHtml(person.email)}</div>
+            <div class="user-item-wrap">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div class="user-item-avatar" style="background: ${color}; color: white; font-size: 16px; font-weight: 700; position:relative; flex-shrink:0;">
+                  ${initial}
+                  <div class="status-dot online" style="position:absolute; bottom:1px; right:1px; width:10px; height:10px; border:2px solid var(--bg-secondary);"></div>
+                </div>
+                <div>
+                  <div class="user-item-name">${escapeHtml(person.name)}</div>
+                  <div class="user-item-email">${escapeHtml(person.email)}</div>
+                </div>
+              </div>
+              <div class="unread-badge" id="badge-${person.id}"></div>
             </div>
           `;
 
@@ -359,10 +465,16 @@
             document.querySelectorAll('.user-item').forEach(i => i.classList.remove('active'));
             this.classList.add('active');
             selectedUser = person;
+            console.log('[Chat] Selected user:', person.name, '| ID:', person.id);
             openChat(person, color, initial);
           });
 
           usersList.appendChild(userItem);
+        });
+
+        // Re-apply any pending unread badges after re-render (e.g. search)
+        Object.keys(unreadCounts).forEach(uid => {
+          if (unreadCounts[uid] > 0) updateBadge(Number(uid), unreadCounts[uid]);
         });
 
         if (count === 0) {
@@ -371,6 +483,20 @@
               No other users found
             </div>
           `;
+        }
+      }
+
+      // ============================================
+      // UNREAD BADGE HELPER
+      // ============================================
+      function updateBadge(userId, count) {
+        const badge = document.getElementById('badge-' + userId);
+        if (!badge) return;
+        if (count > 0) {
+          badge.textContent = count > 99 ? '99+' : count;
+          badge.style.display = 'flex';
+        } else {
+          badge.style.display = 'none';
         }
       }
 
@@ -406,6 +532,18 @@
         }, 'received');
 
         messageInput.focus();
+
+        // ── Read Receipt: tell sender their msgs are now read ──
+        if (socket && socket.connected && user) {
+          socket.emit('messageRead', {
+            originalSenderId: person.id,
+            readBy: user.id,
+          });
+        }
+
+        // ── Clear unread badge for this user ──
+        unreadCounts[person.id] = 0;
+        updateBadge(person.id, 0);
       }
 
       // ============================================
@@ -434,21 +572,34 @@
         }
 
         const now = new Date();
+        // Unique message ID for tick tracking
+        const msgId = Date.now() + '-' + Math.random().toString(36).substr(2, 6);
+
         const messageData = {
-          senderId: user ? user.id : 0,
+          senderId:   user ? user.id : 0,
           senderName: user ? user.name : 'You',
           receiverId: selectedUser.id,
-          message: text,
-          time: formatTime(now),
+          message:    text,
+          time:       formatTime(now),
+          msgId:      msgId,
         };
+
+        console.log('[Chat] Sending message | from:', messageData.senderId, '→ to:', messageData.receiverId);
 
         // Emit to socket
         if (socket && socket.connected) {
           socket.emit('sendMessage', messageData);
+        } else {
+          showToast('Not connected to server ❌', 'error');
+          return;
         }
 
-        // Show in UI
-        addMessage(messageData, 'sent');
+        // Show in UI immediately — returns the tick element
+        const tickEl = addMessage(messageData, 'sent');
+        if (tickEl) {
+          tickEl.dataset.receiverId = selectedUser.id;
+          sentMessages.set(msgId, tickEl);
+        }
         messageInput.value = '';
         messagesArea.scrollTop = messagesArea.scrollHeight;
       }
@@ -458,15 +609,34 @@
       // ============================================
       if (socket) {
         socket.on('receiveMessage', function (data) {
-          if (user && Number(data.senderId) !== Number(user.id)) {
-            // Show typing first then message
+          console.log('[Socket] receiveMessage | from:', data.senderId, data.senderName, '→ to:', data.receiverId);
+
+          // Ignore if this is our own message echoed back
+          if (user && Number(data.senderId) === Number(user.id)) return;
+
+          // Check if the message is from the currently open chat (match by ID)
+          const isCurrentChat = selectedUser && Number(data.senderId) === Number(selectedUser.id);
+
+          if (isCurrentChat) {
+            // Show typing indicator then the message
             showTypingIndicator(data.senderName);
             setTimeout(() => {
               hideTypingIndicator();
               addMessage(data, 'received');
               messagesArea.scrollTop = messagesArea.scrollHeight;
-              showToast(`New message from ${data.senderName} 💬`, 'info');
-            }, 800);
+              // Immediately send read receipt since chat is open
+              if (socket && socket.connected && user) {
+                socket.emit('messageRead', {
+                  originalSenderId: data.senderId,
+                  readBy: user.id,
+                });
+              }
+            }, 600);
+          } else {
+            // ── Increment unread count & show badge ──
+            unreadCounts[data.senderId] = (unreadCounts[data.senderId] || 0) + 1;
+            updateBadge(data.senderId, unreadCounts[data.senderId]);
+            showToast(`💬 ${data.senderName}: ${data.message.length > 30 ? data.message.slice(0,30)+'…' : data.message}`, 'info');
           }
         });
       }
@@ -481,13 +651,15 @@
         const wrap = document.createElement('div');
         wrap.className = `message-wrap ${type}`;
 
-        const tick = type === 'sent' ? '<span class="message-tick">✓✓</span>' : '';
-
+        // Build message HTML
         wrap.innerHTML = `
           <div class="message-bubble">${escapeHtml(data.message)}</div>
           <div class="message-meta">
             <span class="message-time">${data.time}</span>
-            ${tick}
+            ${type === 'sent' ? `
+              <span class="msg-ticks" data-msg-id="${data.msgId || ''}">
+                <span class="t1">✓</span><span class="t2">✓</span>
+              </span>` : ''}
           </div>
         `;
 
@@ -495,6 +667,12 @@
         wrap.style.animation = 'fadeIn 0.3s ease';
         messagesArea.appendChild(wrap);
         messagesArea.scrollTop = messagesArea.scrollHeight;
+
+        // Return tick element so sendMessage can register it
+        if (type === 'sent') {
+          return wrap.querySelector('.msg-ticks');
+        }
+        return null;
       }
 
       // ============================================
@@ -524,6 +702,30 @@
       }
 
       // ============================================
+      // TICK EVENTS: Delivery & Read Receipts
+      // ============================================
+      if (socket) {
+        // ✓✓ Grey — message delivered to receiver's device
+        socket.on('messageDelivered', function (data) {
+          const tickEl = sentMessages.get(data.msgId);
+          if (tickEl && !tickEl.classList.contains('read')) {
+            tickEl.classList.add('delivered');
+          }
+        });
+
+        // ✓✓ Blue — receiver has opened the chat and read the messages
+        socket.on('messagesRead', function (data) {
+          // Turn ALL messages sent to this user blue
+          sentMessages.forEach((tickEl, msgId) => {
+            if (Number(tickEl.dataset.receiverId) === Number(data.readBy)) {
+              tickEl.classList.remove('delivered');
+              tickEl.classList.add('read');
+            }
+          });
+        });
+      }
+
+      // ============================================
       // SEND BUTTON & ENTER KEY
       // ============================================
       sendBtn.addEventListener('click', sendMessage);
@@ -550,6 +752,100 @@
           .replace(/"/g, '&quot;')
           .replace(/'/g, '&#039;');
       }
+
+      // ============================================
+      // COPY UID BUTTON
+      // ============================================
+      document.getElementById('copyUIDBtn').addEventListener('click', () => {
+        const uid = document.getElementById('myUIDValue').textContent;
+        if (!uid || uid === 'N/A' || uid === 'Loading...') return;
+        navigator.clipboard.writeText(uid).then(() => {
+          const btn = document.getElementById('copyUIDBtn');
+          btn.textContent = '✅';
+          showToast(`ID copied: ${uid} 📋`, 'success');
+          setTimeout(() => { btn.textContent = '📋'; }, 2000);
+        });
+      });
+
+      // ============================================
+      // FIND USER BY UID
+      // ============================================
+      async function searchByUID() {
+        const input = document.getElementById('uidSearchInput');
+        const resultEl = document.getElementById('uidSearchResult');
+        const raw = input.value.trim().toUpperCase();
+
+        if (!raw) {
+          showToast('Please enter a User ID ⚠️', 'warning');
+          return;
+        }
+
+        // Auto-add CS- prefix if user forgot
+        const uid = raw.startsWith('CS-') ? raw : 'CS-' + raw;
+
+        resultEl.innerHTML = `<div class="uid-searching">⏳ Searching...</div>`;
+
+        try {
+          const res = await fetch(`http://localhost:3000/api/users/find/${uid}`);
+          const data = await res.json();
+
+          if (!res.ok) {
+            resultEl.innerHTML = `<div class="uid-not-found">❌ ${data.message}</div>`;
+            return;
+          }
+
+          const person = data.user;
+
+          // Don't allow chatting with yourself
+          if (user && Number(person.id) === Number(user.id)) {
+            resultEl.innerHTML = `<div class="uid-not-found">😄 That's your own ID!</div>`;
+            return;
+          }
+
+          const avatarColors = [
+            'linear-gradient(135deg, #6366f1, #8b5cf6)',
+            'linear-gradient(135deg, #06b6d4, #6366f1)',
+            'linear-gradient(135deg, #10b981, #06b6d4)',
+            'linear-gradient(135deg, #ec4899, #6366f1)',
+          ];
+          const color = avatarColors[person.id % avatarColors.length];
+          const initial = person.name.charAt(0).toUpperCase();
+
+          resultEl.innerHTML = `
+            <div class="uid-found-card" id="uidFoundCard">
+              <div class="uid-found-avatar" style="background:${color}">${initial}</div>
+              <div class="uid-found-info">
+                <div class="uid-found-name">${escapeHtml(person.name)}</div>
+                <div class="uid-found-uid">${escapeHtml(person.uid)}</div>
+              </div>
+              <button class="uid-chat-btn" id="uidChatBtn">💬 Chat</button>
+            </div>
+          `;
+
+          document.getElementById('uidChatBtn').addEventListener('click', () => {
+            // Open chat with this user
+            document.querySelectorAll('.user-item').forEach(i => i.classList.remove('active'));
+            selectedUser = person;
+            openChat(person, color, initial);
+            resultEl.innerHTML = '';
+            input.value = '';
+            showToast(`Chat opened with ${person.name} 💬`, 'success');
+          });
+
+        } catch (err) {
+          resultEl.innerHTML = `<div class="uid-not-found">❌ Cannot connect to server</div>`;
+        }
+      }
+
+      document.getElementById('uidSearchBtn').addEventListener('click', searchByUID);
+      document.getElementById('uidSearchInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchByUID();
+      });
+
+      // Auto-uppercase UID input
+      document.getElementById('uidSearchInput').addEventListener('input', (e) => {
+        e.target.value = e.target.value.toUpperCase();
+      });
 
       // ============================================
       // LOAD USERS ON START
